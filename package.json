@@ -1,0 +1,17 @@
+{
+  "name": "whatsapp-ordering-mvp",
+  "version": "1.0.0",
+  "description": "WhatsApp ordering system with delivery tracking",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

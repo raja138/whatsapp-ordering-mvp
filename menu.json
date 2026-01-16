@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Burger",
+      "price": 5.99,
+      "category": "main"
+    },
+    {
+      "id": 2,
+      "name": "Pizza",
+      "price": 8.99,
+      "category": "main"
+    },
+    {
+      "id": 3,
+      "name": "Coke",
+      "price": 1.99,
+      "category": "beverage"
+    }
+  ]
+}
