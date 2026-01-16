@@ -45,8 +45,7 @@ async function handleWebhookMessages(req, res) {
           await handleIncomingMessage(message);
         }
       }
-```    }
-    
+    }
     res.status(200).json({ status: 'ok' });
   } catch (error) {
     console.error('Webhook error:', error);
@@ -55,7 +54,7 @@ async function handleWebhookMessages(req, res) {
 }
 
 // Main webhook handler that routes GET and POST
-async function setupWhatsAppWebhook(req, res) {
+function setupWhatsAppWebhook(req, res) {
   if (req.method === 'GET') {
     return handleWebhookVerification(req, res);
   } else if (req.method === 'POST') {
