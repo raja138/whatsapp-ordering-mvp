@@ -1,50 +1,28 @@
-const express = require('express');
-const { setupWhatsAppWebhook } = require('./webhook');
-const { initializeDatabase } = require('./db');
-const { getActiveDeliveries } = require('./delivery');
-const db = require('./db');
-
+const express = require("express");
 const app = express();
+
 app.use(express.json());
 
-// Initialize database
-initializeDatabase();
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "my_whatsapp_webhook_token";
 
-// WhatsApp webhook routes - handle both GET and POST
-app.get('/webhook', setupWhatsAppWebhook);
-app.post('/webhook', setupWhatsAppWebhook);
+  if (
+    req.query["hub.mode"] === "subscribe" &&
+    req.query["hub.verify_token"] === VERIFY_TOKEN
+  ) {
+    console.log("✅ Webhook verification request received");
+    return res.send(req.query["hub.challenge"]);
+  }
 
-// API endpoints for dashboard
-app.get('/api/orders', (req, res) => {
-  db.all('SELECT * FROM orders ORDER BY created_at DESC', [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json(rows || []);
-    }
-  });
+  return res.sendStatus(403);
 });
 
-app.get('/api/deliveries', (req, res) => {
-  getActiveDeliveries((deliveries) => {
-    res.json(deliveries);
-  });
+app.post("/webhook", (req, res) => {
+  console.log("🔥 WHATSAPP MESSAGE RECEIVED");
+  console.log(JSON.stringify(req.body, null, 2));
+  res.sendStatus(200);
 });
 
-app.put('/api/orders/:id/status', (req, res) => {
-  const { status } = req.body;
-  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ success: true });
-    }
-  });
+app.listen(8080, () => {
+  console.log("🚀 Server running on port 8080");
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-module.exports = app;
