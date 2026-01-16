@@ -2,38 +2,50 @@ const { handleIncomingMessage } = require('./orders');
 
 // Handle GET requests for webhook verification (Meta requirement)
 function handleWebhookVerification(req, res) {
+  console.log('📨 GET /webhook request received');
+  console.log('Query params:', req.query);
+  
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
   
   const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'test_token';
   
+  console.log(`Mode: ${mode}, Token: ${token}, Expected: ${verifyToken}`);
+  
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('Webhook verified by Meta');
+    console.log('✅ Webhook verified by Meta');
     res.status(200).send(challenge);
   } else {
-    console.error('Webhook verification failed');
+    console.error('❌ Webhook verification failed');
     res.status(403).json({ error: 'Verification failed' });
   }
 }
 
 // Handle POST requests for incoming messages
 async function handleWebhookMessages(req, res) {
+  console.log('🔥 POST /webhook received');
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+  
   try {
     const { entry } = req.body;
     
     if (!entry) {
+      console.log('No entry in request body');
       return res.status(200).json({ status: 'ok' });
     }
+    
+    console.log(`Processing ${entry.length} entries`);
     
     for (const item of entry) {
       for (const change of item.changes) {
         const message = change.value.messages?.[0];
         if (message) {
+          console.log(`📬 Message from ${message.from}: ${message.text}`);
           await handleIncomingMessage(message);
         }
       }
-    }
+```    }
     
     res.status(200).json({ status: 'ok' });
   } catch (error) {
