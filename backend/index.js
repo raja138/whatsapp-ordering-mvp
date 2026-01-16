@@ -1,5 +1,5 @@
 const express = require('express');
-const { setupWhatsAppWebhook } = require('./webhook');
+const { verifyWebhook, handleWhatsAppMessage } = require('./webhook');
 const { initializeDatabase } = require('./db');
 const { getActiveDeliveries } = require('./delivery');
 const db = require('./db');
@@ -13,21 +13,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize database
+// Init DB
 initializeDatabase();
 
-// WhatsApp webhook routes - handle both GET and POST
-app.get('/webhook', setupWhatsAppWebhook);
-app.post('/webhook', setupWhatsAppWebhook);
+// ✅ CORRECT webhook wiring
+app.get('/webhook', verifyWebhook);
+app.post('/webhook', handleWhatsAppMessage);
 
-// API endpoints for dashboard
+// Dashboard APIs
 app.get('/api/orders', (req, res) => {
   db.all('SELECT * FROM orders ORDER BY created_at DESC', [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json(rows || []);
-    }
+    if (err) res.status(500).json({ error: err.message });
+    else res.json(rows || []);
   });
 });
 
@@ -39,18 +36,18 @@ app.get('/api/deliveries', (req, res) => {
 
 app.put('/api/orders/:id/status', (req, res) => {
   const { status } = req.body;
-  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ success: true });
+  db.run(
+    'UPDATE orders SET status = ? WHERE id = ?',
+    [status, req.params.id],
+    (err) => {
+      if (err) res.status(500).json({ error: err.message });
+      else res.json({ success: true });
     }
-  });
+  );
 });
 
-const PORT = process.env.PORT || 3000;
+// ⚠️ Railway-safe port
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-module.exports = app;
