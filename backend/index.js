@@ -10,7 +10,8 @@ app.use(express.json());
 // Initialize database
 initializeDatabase();
 
-// WhatsApp webhook routes
+// WhatsApp webhook routes - handle both GET and POST
+app.get('/webhook', setupWhatsAppWebhook);
 app.post('/webhook', setupWhatsAppWebhook);
 
 // API endpoints for dashboard
